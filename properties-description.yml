@@ -23,8 +23,8 @@ paths:
                   $ref: '#/components/schemas/simple_property'
     post:
       summary: post a new simple property
-      parameters:
-      - $ref: '#/components/parameters/property'
+      requestBody:
+        $ref: '#/components/requestBodies/property'
       responses:
         200:
           description: add the given property 
@@ -49,7 +49,9 @@ paths:
     post:
       summary: post a new comment to the specified prperty
       parameters:
-      - $ref: '#/components/parameters/comment'
+        - $ref: '#/components/parameters/property_id'
+      requestBody:
+        $ref: '#/components/requestBodies/comment'
       responses:
         200:
           description: add the given coomment to the specified property 
@@ -59,6 +61,7 @@ paths:
                 $ref: '#/components/schemas/comment'
 
 components:
+
   parameters:
     property_id:
       in: path
@@ -67,10 +70,9 @@ components:
       required: true
       schema:
         type: string
-    
+  
+  requestBodies:
     property:
-      in: query
-      name: property
       description: property information to post
       required: true
       content:
@@ -79,8 +81,6 @@ components:
             $ref: '#/components/schemas/simple_property'
 
     comment:
-      in: query
-      name: comment
       description: comment to post
       required: true
       content:
@@ -89,7 +89,6 @@ components:
             $ref: '#/components/schemas/comment'
 
   schemas:
-
     simple_property:
       type: object
       properties:
