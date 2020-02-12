@@ -1,7 +1,7 @@
 openapi: 3.0.0
-# Added by API Auto Mocking Plugin
+
 info:
-  description: This is a simple API
+  description: real estate renting API
   version: "1.0.0"
   title: Simple properties renting API
 
@@ -20,29 +20,73 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/commented_property'
-  
+                  $ref: '#/components/schemas/simple_property'
+    post:
+      summary: post a new simple property
+      parameters:
+      - $ref: '#/components/parameters/property'
+      responses:
+        200:
+          description: add the given property 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simple_property'
+
+
   /properties/{property_id}:
     get:
+      description: get property by id
       parameters:
       - $ref: '#/components/parameters/property_id'
       responses:
         200:
-          description: the property's information
+          description: get the specified property information with comments
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/commented_property'
+    post:
+      summary: post a new comment to the specified prperty
+      parameters:
+      - $ref: '#/components/parameters/comment'
+      responses:
+        200:
+          description: add the given coomment to the specified property 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/comment'
 
 components:
   parameters:
     property_id:
-        in: path
-        name: property_id
-        description: the requested property id
-        required: true
-        schema:
-          type: string
+      in: path
+      name: property_id
+      description: the requested property id
+      required: true
+      schema:
+        type: string
+    
+    property:
+      in: query
+      name: property
+      description: property information to post
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/simple_property'
+
+    comment:
+      in: query
+      name: comment
+      description: comment to post
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/comment'
 
   schemas:
 
