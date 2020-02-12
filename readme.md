@@ -13,5 +13,8 @@ The aim of this project is to create a real estate renting API using following t
     It consists of a yaml file describig / defining the API with general informations, availble paths and operations... 
     [The OpenAPI map](http://openapi-map.apihandyman.io/?version=3.0) provides a very interessting shemas and a complete explanaision of the file structure.
     The [official documentation](https://swagger.io/docs/specification/about/) is also very usefull.
-3. Use for code generation.
+3. Code generation scala-akka-http-server.
+
+For steps 2 and 3, I used the [swaggerhub](https://app.swaggerhub.com/home) online.
+
 4. Complete the generated code.
