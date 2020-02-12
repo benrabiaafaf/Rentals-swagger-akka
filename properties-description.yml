@@ -1,0 +1,94 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: Simple properties renting API
+
+servers:
+- url: https://virtserver.swaggerhub.com/benrabiaafef/Properties/1.0.0
+  
+paths:
+  /properties:
+    get:
+      summary: get all availble properties
+      responses:
+        200:
+          description: a list of availble properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/commented_property'
+  
+  /properties/{property_id}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/property_id'
+      responses:
+        200:
+          description: the property's information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commented_property'
+
+components:
+  parameters:
+    property_id:
+        in: path
+        name: property_id
+        description: the requested property id
+        required: true
+        schema:
+          type: string
+
+  schemas:
+
+    simple_property:
+      type: object
+      properties:
+        property_id:
+          type: string
+        owner_id:
+          type: string
+        type:
+          type: string
+        adress:
+          type: string
+        rooms:
+          type: integer
+        area:
+          type: number
+        rent:
+          type: number
+    
+    comment:
+      type: object
+      properties:
+        user_id:
+          type: string
+        property_id:
+          type: string
+        year:
+          type: integer
+        rent:
+          type: number
+      required:
+        - user_id
+        - property_id
+        - year
+        - rent
+
+    commented_property:
+      type: object
+      properties:
+        property:
+          $ref: '#/components/schemas/simple_property'
+        comments:
+          type: array
+          items: 
+            $ref: '#/components/schemas/comment'
+      required:
+        - property
