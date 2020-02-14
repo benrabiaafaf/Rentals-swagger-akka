@@ -1,9 +1,13 @@
 package io.swagger.server
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.server.Route
 import io.swagger.server.api.{DefaultApiMarshaller, DefaultApiService}
 import io.swagger.server.model.{Comment, Commented_property, Simple_property}
+import spray.json.{JsonFormat, RootJsonFormat}
+import spray.json.DefaultJsonProtocol._
+import spray.json.JsObject._
 
 
 object ApiService extends DefaultApiService {
@@ -28,14 +32,15 @@ object ApiService extends DefaultApiService {
   override def propertiesPropertyIdPost(body: Comment, propertyId: String)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route = ???
 }
 
-object ApiMarshaller extends DefaultApiMarshaller {
-  override implicit def toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]] = ???
+object ApiMarshaller extends DefaultApiMarshaller with SprayJsonSupport {
 
-  override implicit def toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property] = ???
+  override implicit def toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]] = listFormat(jsonFormat8(Simple_property))
 
-  override implicit def toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property] = ???
+  override implicit def toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property] = jsonFormat8(Simple_property)
 
-  override implicit def toEntityMarshallercomment: ToEntityMarshaller[Comment] = ???
+  override implicit def toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property] = jsonFormat2(Commented_property)
+
+  override implicit def toEntityMarshallercomment: ToEntityMarshaller[Comment] = jsonFormat4(Comment)
 }
 
 object Server extends App {
