@@ -10,6 +10,7 @@ import java.math.BigDecimal
  * @param rooms 
  * @param area 
  * @param rent 
+ * @param images 
  */
 case class Simple_property (
   property_id: Option[String],
@@ -18,6 +19,7 @@ case class Simple_property (
   adress: Option[String],
   rooms: Option[Int],
   area: Option[BigDecimal],
-  rent: Option[BigDecimal]
+  rent: Option[BigDecimal],
+  images: Option[List[String]]
 )
 
