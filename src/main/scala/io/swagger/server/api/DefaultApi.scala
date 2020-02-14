@@ -1,5 +1,6 @@
 package io.swagger.server.api
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
@@ -8,7 +9,7 @@ import io.swagger.server.model.Comment
 import io.swagger.server.model.Simple_property
 import io.swagger.server.model.Commented_property
 
-class DefaultApi( defaultService: DefaultApiService, defaultMarshaller: DefaultApiMarshaller) {
+class DefaultApi( defaultService: DefaultApiService, defaultMarshaller: DefaultApiMarshaller) extends SprayJsonSupport {
 
   import defaultMarshaller._
 
@@ -33,7 +34,7 @@ class DefaultApi( defaultService: DefaultApiService, defaultMarshaller: DefaultA
 
         }
       } ~
-      path("properties") { (propertyId) =>
+      path("properties"/ Segment) { (propertyId) =>
         get {
 
 
@@ -42,7 +43,7 @@ class DefaultApi( defaultService: DefaultApiService, defaultMarshaller: DefaultA
 
         }
       } ~
-      path("properties") { (propertyId) =>
+      path("properties"/ Segment) { (propertyId) =>
         post {
 
 
