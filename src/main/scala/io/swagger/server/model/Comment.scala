@@ -1,6 +1,6 @@
 package io.swagger.server.model
 
-import java.math.BigDecimal
+import scala.math.BigDecimal
 
 /**
  * @param user_id 
