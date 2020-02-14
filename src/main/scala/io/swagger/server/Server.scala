@@ -3,17 +3,21 @@ package io.swagger.server
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.server.Route
-import io.swagger.server.api.{DefaultApiMarshaller, DefaultApiService}
-import io.swagger.server.model.{Comment, Commented_property, Simple_property}
-import spray.json.{JsonFormat, RootJsonFormat}
-import spray.json.DefaultJsonProtocol._
-import spray.json.JsObject._
+import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
+import io.swagger.server.CostumJsonProtocol.jsonFormat8
+import io.swagger.server.api._
+import io.swagger.server.model._
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+import spray.json.DefaultJsonProtocol.{jsonFormat4, jsonFormat8, _}
 
 
 object ApiService extends DefaultApiService {
+
   /**
     * Code: 200, Message: a list of availble properties, DataType: List[simple_property]
     */
+
+  //  type Route = RequestContext => Future[RouteResult]
   override def propertiesGet()(implicit toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]]): Route = ???
 
   /**
@@ -32,15 +36,25 @@ object ApiService extends DefaultApiService {
   override def propertiesPropertyIdPost(body: Comment, propertyId: String)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route = ???
 }
 
+object CostumJsonProtocol extends DefaultJsonProtocol {
+  implicit val simple_propertyFormat = jsonFormat8(Simple_property)
+  implicit val commentFormat = jsonFormat4(Comment)
+  implicit val commeented_propertyFormat = jsonFormat2(Commented_property)
+}
+
 object ApiMarshaller extends DefaultApiMarshaller with SprayJsonSupport {
 
-  override implicit def toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]] = listFormat(jsonFormat8(Simple_property))
+  import CostumJsonProtocol._
 
-  override implicit def toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property] = jsonFormat8(Simple_property)
+  implicit val toEntityMarshallercomment: ToEntityMarshaller[Comment] = commentFormat
 
-  override implicit def toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property] = jsonFormat2(Commented_property)
+  implicit val toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property] = simple_propertyFormat
 
-  override implicit def toEntityMarshallercomment: ToEntityMarshaller[Comment] = jsonFormat4(Comment)
+  implicit val toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property] = commeented_propertyFormat
+
+  implicit val toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]] = listFormat(simple_propertyFormat)
+
+
 }
 
 object Server extends App {
