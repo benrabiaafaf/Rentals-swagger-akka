@@ -17,4 +17,8 @@ The aim of this project is to create a real estate renting API using following t
 
 For steps 2 and 3, I used the [swaggerhub](https://app.swaggerhub.com/home) online.
 
-4. Complete the generated code.
+4. Write the logic behid the server
+    - Create two objects extending ```DefaultApiService``` and ```DefaultApiMarshaller```
+    - [Marshalling](https://squbs.readthedocs.io/en/latest/marshalling/):  
+    Marshalling and unmarshalling is used both on the client and server side. On the server side it is used to map an incoming request to a Scala or Java object and to map a Scala or Java object to an outgoing response. Similarly, on the client side, it is used to marshal an object to an outgoing HTTP request and unmarshal it from an incoming response.    
+    Here, we will be using ```spray-json```
