@@ -106,13 +106,15 @@ components:
           type: number
         rent:
           type: number
+        images:
+          type: array
+          items: 
+            type: string
     
     comment:
       type: object
       properties:
         user_id:
-          type: string
-        property_id:
           type: string
         year:
           type: integer
@@ -120,7 +122,6 @@ components:
           type: number
       required:
         - user_id
-        - property_id
         - year
         - rent
 
