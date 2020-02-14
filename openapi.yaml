@@ -6,7 +6,7 @@ info:
   title: Simple properties renting API
 
 servers:
-- url: https://virtserver.swaggerhub.com/benrabiaafef/Properties/1.0.0
+- url: http://localhost:8080/
   
 paths:
   /properties:
