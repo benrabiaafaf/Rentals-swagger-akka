@@ -59,8 +59,14 @@ class DBManager extends Actor with ActorLogging {
 
     case post_comment_to_proprty(propertyId, comment) => ???
     case post_property(simple_property) => ???
-    case get_all_properties() => ???
+    case get_all_properties() => sender() ! get_all_properties()
     case get_property(propertyId) => ???
+  }
+
+  def get_all_properties(): List[Simple_property] = {
+    val commented_properties = read_properties()
+    val simple_propertie = commented_properties.map(_.property)
+    return simple_propertie
   }
 }
 
