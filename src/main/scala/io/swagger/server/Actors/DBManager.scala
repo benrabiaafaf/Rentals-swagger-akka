@@ -58,7 +58,7 @@ class DBManager extends Actor with ActorLogging {
   override def receive: Receive = {
 
     case post_comment_to_proprty(propertyId, comment) => ???
-    case post_property(simple_property) => ???
+    case post_property(simple_property) => post_property(simple_property)
     case get_all_properties() => sender() ! get_all_properties()
     case get_property(propertyId) => sender()! get_property(propertyId)
   }
@@ -73,6 +73,11 @@ class DBManager extends Actor with ActorLogging {
     val commented_properties = read_properties()
     val requested_property = commented_properties.find( item => item.property.property_id == propertyId)
     return requested_property.get
+  }
+
+  def post_property(simple_property: Simple_property)={
+    var properties = read_properties()
+    save_properties( properties ::: List(new Commented_property(property = simple_property, comments = Option(Nil))))
   }
 }
 
