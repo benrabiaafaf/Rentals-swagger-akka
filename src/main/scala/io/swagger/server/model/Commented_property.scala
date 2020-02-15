@@ -6,6 +6,11 @@ package io.swagger.server.model
  * @param comments 
  */
 case class Commented_property ( property: Simple_property,
-                                comments: Option[List[Comment]]
+                                var comments: Option[List[Comment]]
                               )
+{
+  def add_comment(comment: Comment): Unit ={
+    comments.getOrElse(Nil) ++: List(comment)
+  }
+}
 
