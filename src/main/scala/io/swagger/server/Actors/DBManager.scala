@@ -21,7 +21,7 @@ object DBManager {
   case class get_all_properties()
 
   case class get_property(propertyId: String)
-  
+
 }
 
 class DBManager extends Actor with ActorLogging {
@@ -30,9 +30,9 @@ class DBManager extends Actor with ActorLogging {
   import spray.json._
 
   val properties_path = "src/main/scala/io/swagger/server/data/properties.json"
-  var properties: List[Commented_property] = Nil
 
-  private def read_data(): Unit = {
+  private def read_properties(): List[Commented_property] = {
+    var properties: List[Commented_property] = Nil
     try {
       properties = scala.io.Source.fromFile(properties_path)("UTF-8").mkString.parseJson.convertTo[List[Commented_property]]
     } catch {
@@ -44,20 +44,18 @@ class DBManager extends Actor with ActorLogging {
       }
       case err: ParsingException => {
         properties = List()
-        save_data()
       }
+    }finally {
+      return properties
     }
   }
 
-  private def save_data(): Unit = {
+  private def save_properties(properties : List[Commented_property]): Unit = {
     val buffer = new BufferedWriter(new FileWriter(properties_path))
     buffer.write(properties.toJson.toString)
     buffer.close
   }
 
-  override def preStart(): Unit = {
-    read_data()
-  }
 
   override def receive: Receive = {
 
