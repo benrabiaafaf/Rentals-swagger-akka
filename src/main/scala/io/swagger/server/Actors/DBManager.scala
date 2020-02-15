@@ -1,73 +1,77 @@
 package io.swagger.server.Actors
 
-import akka.actor.{Actor, Props}
+
+import java.io.{BufferedWriter, FileNotFoundException, FileWriter, IOException}
+
+import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import io.swagger.server.Actors.DBManager.{get_all_properties, get_property, post_comment_to_proprty, post_property}
 import io.swagger.server.model.{Comment, Commented_property, Simple_property}
-import math.BigDecimal
+import spray.json.JsonParser.ParsingException
+import scala.math.BigDecimal
 
 
+object DBManager {
 
-object DBManager{
-  def apply: Props = Props(new DBManager())
+  def apply(): Props = Props(new DBManager())
 
   case class post_comment_to_proprty(propertyId: String, comment: Comment)
-  case class post_property(property: Simple_property)
-  case class get_all_properties()
-  case class get_property(propertyId: String)
-}
-class DBManager extends Actor{
-  import DBManager._
 
-  var properties : List[Commented_property]
+  case class post_property(property: Simple_property)
+
+  case class get_all_properties()
+
+  case class get_property(propertyId: String)
+  
+}
+
+class DBManager extends Actor with ActorLogging {
+
+  import io.swagger.server.CostumJsonProtocol._
+  import spray.json._
+
+  val properties_path = "src/main/scala/io/swagger/server/data/properties.json"
+  var properties: List[Commented_property] = Nil
+
+  private def read_data(): Unit = {
+    try {
+      properties = scala.io.Source.fromFile(properties_path)("UTF-8").mkString.parseJson.convertTo[List[Commented_property]]
+    } catch {
+      case err: FileNotFoundException => {
+        log.info("Exception: File missing")
+      }
+      case err: IOException => {
+        log.info("Input/output Exception")
+      }
+      case err: ParsingException => {
+        properties = List()
+        save_data()
+      }
+    }
+  }
+
+  private def save_data(): Unit = {
+    val buffer = new BufferedWriter(new FileWriter(properties_path))
+    buffer.write(properties.toJson.toString)
+    buffer.close
+  }
 
   override def preStart(): Unit = {
-    properties = List(
-      new Commented_property(
-        new Simple_property(
-          property_id = Some("p1"),
-          owner_id = Some("o1"),
-          property_type = Some("T1"),
-          adress = Some("Villetaneuse"),
-          rooms = Some(1),
-          area = Option(BigDecimal(20)),
-          rent = Option(BigDecimal(600)),
-          images = None
-        ),
-        comments = None)
-    )
+    read_data()
   }
 
   override def receive: Receive = {
 
-    case post_comment_to_proprty(propertyId,comment) =>{
-      val item = properties filter(item => item.property.property_id == propertyId)
-      val index = properties.indexOf(item)
-
-    }
+    case post_comment_to_proprty(propertyId, comment) => ???
     case post_property(simple_property) => ???
     case get_all_properties() => ???
     case get_property(propertyId) => ???
   }
 }
 
-object main{
+object Main {
   def main(args: Array[String]): Unit = {
-    val properties = List(
-      new Commented_property(
-        new Simple_property(
-          property_id = Some("p1"),
-          owner_id = Some("o1"),
-          property_type = Some("T1"),
-          adress = Some("Villetaneuse"),
-          rooms = Some(1),
-          area = Option(BigDecimal(20)),
-          rent = Option(BigDecimal(600)),
-          images = None
-        ),
-        comments = None)
-    )
-    val propertyId = "p1"
-    val item = properties filter(item => item.property.property_id == propertyId)
-    val index = properties.indexOf(item)
-    println(index)
+    val system = ActorSystem()
+    val dBManager = system.actorOf(DBManager())
+    dBManager ! "test"
   }
 }
