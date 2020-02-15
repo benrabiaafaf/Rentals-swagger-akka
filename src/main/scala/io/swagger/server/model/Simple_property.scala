@@ -19,6 +19,6 @@ case class Simple_property (
   adress: Option[String],
   rooms: Option[Int],
   area: Option[BigDecimal],
-  rent: Option[BigDecimal],
-  images: Option[List[String]]
+  var rent: Option[BigDecimal],
+  var images: Option[List[String]]
 )
