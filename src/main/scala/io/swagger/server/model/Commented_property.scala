@@ -7,6 +7,6 @@ package io.swagger.server.model
  */
 case class Commented_property (
   property: Simple_property,
-  comments: Option[List[Comment]]
+  var comments: Option[List[Comment]]
 )
 
