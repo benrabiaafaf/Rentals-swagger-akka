@@ -32,7 +32,7 @@ class DBManager extends Actor with ActorLogging {
   val properties_path = "src/main/scala/io/swagger/server/data/properties.json"
 
   private def read_properties(): List[Commented_property] = {
-    var properties: List[Commented_property] = Nil
+    var properties : List[Commented_property] = List()
     try {
       properties = scala.io.Source.fromFile(properties_path)("UTF-8").mkString.parseJson.convertTo[List[Commented_property]]
     } catch {
@@ -42,12 +42,10 @@ class DBManager extends Actor with ActorLogging {
       case err: IOException => {
         log.info("Input/output Exception")
       }
-      case err: ParsingException => {
-        properties = List()
-      }
-    }finally {
-      return properties
+      case err: ParsingException => ???
     }
+    return properties
+
   }
 
   private def save_properties(properties : List[Commented_property]): Unit = {
