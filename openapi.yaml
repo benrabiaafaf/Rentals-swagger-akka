@@ -7,7 +7,7 @@ info:
 
 servers:
 - url: http://localhost:8080/
-  
+
 paths:
   /properties:
     get:
@@ -27,7 +27,7 @@ paths:
         $ref: '#/components/requestBodies/property'
       responses:
         200:
-          description: add the given property 
+          description: add the given property
           content:
             application/json:
               schema:
@@ -54,7 +54,7 @@ paths:
         $ref: '#/components/requestBodies/comment'
       responses:
         200:
-          description: add the given coomment to the specified property 
+          description: add the given coomment to the specified property
           content:
             application/json:
               schema:
@@ -70,7 +70,7 @@ components:
       required: true
       schema:
         type: string
-  
+
   requestBodies:
     property:
       description: property information to post
@@ -96,7 +96,7 @@ components:
           type: string
         owner_id:
           type: string
-        type:
+        property_type:
           type: string
         adress:
           type: string
@@ -108,9 +108,17 @@ components:
           type: number
         images:
           type: array
-          items: 
+          items:
             type: string
-    
+      required:
+      - property_id
+      - owner_id
+      - property_type
+      - adress
+      - rooms
+      - area
+      - rent
+
     comment:
       type: object
       properties:
@@ -134,7 +142,7 @@ components:
           $ref: '#/components/schemas/simple_property'
         comments:
           type: array
-          items: 
+          items:
             $ref: '#/components/schemas/comment'
       required:
         - property
