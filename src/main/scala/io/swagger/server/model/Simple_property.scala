@@ -5,20 +5,20 @@ import scala.math.BigDecimal
 /**
  * @param property_id 
  * @param owner_id 
- * @param property_type
- * @param adress
- * @param rooms
- * @param area
- * @param rent
- * @param images
+ * @param property_type 
+ * @param adress 
+ * @param rooms 
+ * @param area 
+ * @param rent 
+ * @param images 
  */
-case class Simple_property (
-  property_id: Option[String],
-  owner_id: Option[String],
-  property_type: Option[String],
-  adress: Option[String],
-  rooms: Option[Int],
-  area: Option[BigDecimal],
-  var rent: Option[BigDecimal],
-  var images: Option[List[String]]
-)
+case class Simple_property (  property_id: String,
+                              owner_id: String,
+                              property_type: String,
+                              adress: String,
+                              rooms: Int,
+                              area: BigDecimal,
+                              rent: BigDecimal,
+                              images: Option[List[String]]
+                           )
+
