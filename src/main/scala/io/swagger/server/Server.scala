@@ -1,39 +1,80 @@
 package io.swagger.server
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-import io.swagger.server.CostumJsonProtocol.jsonFormat8
+import io.swagger.server.Actors.DBManager
 import io.swagger.server.api._
 import io.swagger.server.model._
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
-import spray.json.DefaultJsonProtocol.{jsonFormat4, jsonFormat8, _}
+import spray.json.DefaultJsonProtocol
+import akka.pattern.ask
 
+object CostumContext {
+  implicit val system = ActorSystem()
+  implicit val executionContext = system.dispatcher
+  implicit val dBManager = system.actorOf(DBManager(),"DBManager")
+
+}
 
 object ApiService extends DefaultApiService {
+  import CostumContext._
 
   /**
     * Code: 200, Message: a list of availble properties, DataType: List[simple_property]
     */
 
   //  type Route = RequestContext => Future[RouteResult]
-  override def propertiesGet()(implicit toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]]): Route = ???
+  override def propertiesGet()(implicit toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]]): Route = {
+
+    val response = (dBManager ? DBManager.get_all_properties()).mapTo[List[Simple_property]]
+    requestcontext => {
+      (response).flatMap {
+        (properties : List[Simple_property]) =>
+          propertiesGet200(properties)(toEntityMarshallersimple_propertyarray)(requestcontext)
+      }
+    }
+  }
 
   /**
     * Code: 200, Message: add the given property, DataType: simple_property
     */
-  override def propertiesPost(body: Simple_property)(implicit toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property]): Route = ???
+  override def propertiesPost(body: Simple_property)(implicit toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property]): Route = {
+    // TODO : body vérification
+    val response = (dBManager ? DBManager.post_property(body)).mapTo[Simple_property]
+    requestcontext => {
+      (response).flatMap {
+        (property : Simple_property) =>
+          propertiesPost200(property)(toEntityMarshallersimple_property)(requestcontext)
+      }
+    }
+  }
 
   /**
     * Code: 200, Message: get the specified property information with comments, DataType: commented_property
     */
-  override def propertiesPropertyIdGet(propertyId: String)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route = ???
+  override def propertiesPropertyIdGet(propertyId: String)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route = {
+    val response = (dBManager ? DBManager.get_property(propertyId)).mapTo[Commented_property]
+    requestcontext => {
+      (response).flatMap {
+        (property : Commented_property) =>
+          propertiesPropertyIdGet200(property)(toEntityMarshallercommented_property)(requestcontext)
+      }
+    }
+  }
 
   /**
     * Code: 200, Message: add the given coomment to the specified property, DataType: comment
     */
-  override def propertiesPropertyIdPost(body: Comment, propertyId: String)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route = ???
+  override def propertiesPropertyIdPost(body: Comment, propertyId: String)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route = {
+    val response = (dBManager ? DBManager.post_comment_to_proprty(propertyId,body)).mapTo[Comment]
+    requestcontext => {
+      (response).flatMap {
+        (comment : Comment) =>
+          propertiesPropertyIdPost200(comment)(toEntityMarshallercomment)(requestcontext)
+      }
+    }
+  }
 }
 
 object CostumJsonProtocol extends DefaultJsonProtocol {
