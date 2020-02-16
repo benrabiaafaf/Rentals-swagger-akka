@@ -1,15 +1,11 @@
 package io.swagger.server.Actors
 
-
 import java.io.{BufferedWriter, FileNotFoundException, FileWriter, IOException}
-
-import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import akka.actor.{Actor, ActorLogging, Props}
 import io.swagger.server.Actors.DBManager.{get_all_properties, get_property, post_comment_to_proprty, post_property}
 import io.swagger.server.model.{Comment, Commented_property, Simple_property}
 import spray.json.JsonParser.ParsingException
 
-import scala.Option
-import scala.math.BigDecimal
 
 
 object DBManager {
@@ -80,7 +76,7 @@ class DBManager extends Actor with ActorLogging {
   }
 
   def post_property(simple_property: Simple_property)={
-    //TODO : Check weather property_id exists or not
+    //TODO : [ Check weather property_id exists or not, make it return a simple property]
     val properties = read_properties()
     val updated_properties = properties ++: List(new Commented_property(property = simple_property, comments = Option(Nil)))
     log.info(updated_properties.toString)
@@ -88,7 +84,7 @@ class DBManager extends Actor with ActorLogging {
   }
 
   def post_comment_to_proprty(propertyId : String, comment: Comment): Unit ={
-    //TODO : check weather user has already posted a comment for the specified year
+    //TODO : [check weather user has already posted a comment for the specified year, make it return a comment]
     val commented_properties = read_properties()
     val index = commented_properties.indexWhere( item => item.property.property_id == propertyId)
     if ( index != -1){
