@@ -1,6 +1,7 @@
 package io.swagger.server
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.server.Route
@@ -9,15 +10,22 @@ import io.swagger.server.api._
 import io.swagger.server.model._
 import spray.json.DefaultJsonProtocol
 import akka.pattern.ask
+import akka.stream.ActorMaterializer
+import akka.util.Timeout
+import scala.concurrent.duration._
+import scala.language.postfixOps
+import scala.io.StdIn
 
 object CostumContext {
   implicit val system = ActorSystem()
+  implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
-  implicit val dBManager = system.actorOf(DBManager(),"DBManager")
-
+  implicit val dBManager = system.actorOf(DBManager(), "DBManager")
+  implicit val timeout = new Timeout(2 seconds)
 }
 
 object ApiService extends DefaultApiService {
+
   import CostumContext._
 
   /**
@@ -30,7 +38,7 @@ object ApiService extends DefaultApiService {
     val response = (dBManager ? DBManager.get_all_properties()).mapTo[List[Simple_property]]
     requestcontext => {
       (response).flatMap {
-        (properties : List[Simple_property]) =>
+        (properties: List[Simple_property]) =>
           propertiesGet200(properties)(toEntityMarshallersimple_propertyarray)(requestcontext)
       }
     }
@@ -44,7 +52,7 @@ object ApiService extends DefaultApiService {
     val response = (dBManager ? DBManager.post_property(body)).mapTo[Simple_property]
     requestcontext => {
       (response).flatMap {
-        (property : Simple_property) =>
+        (property: Simple_property) =>
           propertiesPost200(property)(toEntityMarshallersimple_property)(requestcontext)
       }
     }
@@ -54,10 +62,11 @@ object ApiService extends DefaultApiService {
     * Code: 200, Message: get the specified property information with comments, DataType: commented_property
     */
   override def propertiesPropertyIdGet(propertyId: String)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route = {
+
     val response = (dBManager ? DBManager.get_property(propertyId)).mapTo[Commented_property]
     requestcontext => {
       (response).flatMap {
-        (property : Commented_property) =>
+        (property: Commented_property) =>
           propertiesPropertyIdGet200(property)(toEntityMarshallercommented_property)(requestcontext)
       }
     }
@@ -67,10 +76,10 @@ object ApiService extends DefaultApiService {
     * Code: 200, Message: add the given coomment to the specified property, DataType: comment
     */
   override def propertiesPropertyIdPost(body: Comment, propertyId: String)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route = {
-    val response = (dBManager ? DBManager.post_comment_to_proprty(propertyId,body)).mapTo[Comment]
+    val response = (dBManager ? DBManager.post_comment_to_proprty(propertyId, body)).mapTo[Comment]
     requestcontext => {
       (response).flatMap {
-        (comment : Comment) =>
+        (comment: Comment) =>
           propertiesPropertyIdPost200(comment)(toEntityMarshallercomment)(requestcontext)
       }
     }
@@ -99,5 +108,22 @@ object ApiMarshaller extends DefaultApiMarshaller with SprayJsonSupport {
 }
 
 object Server extends App {
+
+  import CostumContext._
+
+  val api = new DefaultApi(ApiService, ApiMarshaller)
+  val host = "localhost"
+  val port = 8888
+  val bindingFuture = Http().bindAndHandle(api.route, host, port)
+  println(s"Server online at http://${host}:${port}/\nPress RETURN to stop...")
+
+  bindingFuture.failed.foreach { ex =>
+    println(s"${ex} Failed to bind to ${host}:${port}!")
+  }
+
+  StdIn.readLine()
+  bindingFuture
+    .flatMap(_.unbind())
+    .onComplete(_ => system.terminate())
 
 }
