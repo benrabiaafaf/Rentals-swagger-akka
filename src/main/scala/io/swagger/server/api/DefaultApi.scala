@@ -60,6 +60,7 @@ trait DefaultApiService {
   def propertiesGet200(responsesimple_propertyarray: List[Simple_property])(implicit toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]]): Route =
     complete((200, responsesimple_propertyarray))
 
+
   /**
     * Code: 200, Message: a list of availble properties, DataType: List[simple_property]
     */
@@ -77,6 +78,9 @@ trait DefaultApiService {
 
   def propertiesPropertyIdGet200(responsecommented_property: Commented_property)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route =
     complete((200, responsecommented_property))
+
+  def propertiesPropertyIdGet404: Route =
+    complete((404, "property_id does not exist"))
 
   /**
     * Code: 200, Message: get the specified property information with comments, DataType: commented_property

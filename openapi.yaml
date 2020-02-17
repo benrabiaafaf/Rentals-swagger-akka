@@ -59,6 +59,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/comment'
+        404:
+          description: property_id does not exist
 
 components:
 
