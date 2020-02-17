@@ -63,11 +63,15 @@ object ApiService extends DefaultApiService {
     */
   override def propertiesPropertyIdGet(propertyId: String)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route = {
     // TODO : deal with the None case
-    val response = (dBManager ? DBManager.get_property(propertyId))
+    val response = (dBManager ? DBManager.get_property(propertyId)).mapTo[Commented_property]
     requestcontext => {
-      (response.mapTo[Commented_property]).flatMap {
+      (response).flatMap {
         (property: Commented_property) =>
-          propertiesPropertyIdGet200(property)(toEntityMarshallercommented_property)(requestcontext)
+          if(property.property == None){
+            propertiesPropertyIdGet404()(requestcontext)
+          }else{
+            propertiesPropertyIdGet200(property)(toEntityMarshallercommented_property)(requestcontext)
+          }
       }
     }
 

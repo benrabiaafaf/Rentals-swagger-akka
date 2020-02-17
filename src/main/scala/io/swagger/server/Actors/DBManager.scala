@@ -58,40 +58,41 @@ class DBManager extends Actor with ActorLogging {
     case post_comment_to_proprty(propertyId, comment) => post_comment_to_proprty(propertyId,comment)
     case post_property(simple_property) => post_property(simple_property)
     case get_all_properties() => sender() ! get_all_properties()
-    case get_property(propertyId) => sender()! get_property(propertyId).getOrElse(None)
+    case get_property(propertyId) => sender()! get_property(propertyId)
   }
 
   def get_all_properties(): List[Simple_property] = {
     val commented_properties = read_properties()
-    val simple_properties = commented_properties.map(_.property)
-    log.info(simple_properties.toString)
+    val simple_properties = commented_properties.map(_.property.get)
     return simple_properties
   }
 
-  def get_property(propertyId: String): Option[Commented_property]  ={
+  def get_property(propertyId: String): Commented_property  ={
     val commented_properties = read_properties()
-    val requested_property = commented_properties.find( item => item.property.property_id == propertyId)
-    log.info(requested_property.getOrElse(None).toString)
-    return requested_property
+    val requested_property = commented_properties.find( item => item.property.get.property_id == propertyId)
+    if (requested_property.getOrElse(None)==None){
+      return new Commented_property(None,None)
+    }else{
+      return requested_property.get
+    }
+
   }
 
   def post_property(simple_property: Simple_property)={
     //TODO : [ Check weather property_id exists or not, make it return a simple property]
     val properties = read_properties()
-    val updated_properties = properties ++: List(new Commented_property(property = simple_property, comments = Option(Nil)))
-    log.info(updated_properties.toString)
+    val updated_properties = properties ++: List(new Commented_property(property = Some(simple_property), comments = Option(Nil)))
     save_properties(updated_properties)
   }
 
   def post_comment_to_proprty(propertyId : String, comment: Comment): Unit ={
     //TODO : [check weather user has already posted a comment for the specified year, make it return a comment]
     val commented_properties = read_properties()
-    val index = commented_properties.indexWhere( item => item.property.property_id == propertyId)
+    val index = commented_properties.indexWhere( item => item.property.get.property_id == propertyId)
     if ( index != -1){
       val item = commented_properties(index)
       val updated_item = item.copy(comments = Option(item.comments.getOrElse(Nil) ++: List(comment)))
       val updated_commented_properties = commented_properties.take(index) ++: List(updated_item) ++: commented_properties.takeRight(commented_properties.length-index-1)
-      log.info(updated_commented_properties.toString)
       save_properties(updated_commented_properties)
     }
   }
