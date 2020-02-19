@@ -7,7 +7,6 @@ import io.swagger.server.model.{Comment, Commented_property, Simple_property}
 import spray.json.JsonParser.ParsingException
 
 
-
 object DBManager {
 
   def apply(): Props = Props(new DBManager())
@@ -30,7 +29,7 @@ class DBManager extends Actor with ActorLogging {
   val properties_path = "src/main/scala/io/swagger/server/data/properties.json"
 
   private def read_properties(): List[Commented_property] = {
-    var properties : List[Commented_property] = List()
+    var properties: List[Commented_property] = List()
     try {
       properties = scala.io.Source.fromFile(properties_path)("UTF-8").mkString.parseJson.convertTo[List[Commented_property]]
     } catch {
@@ -46,7 +45,7 @@ class DBManager extends Actor with ActorLogging {
 
   }
 
-  private def save_properties(properties : List[Commented_property]): Unit = {
+  private def save_properties(properties: List[Commented_property]): Unit = {
     val buffer = new BufferedWriter(new FileWriter(properties_path))
     buffer.write(properties.toJson.toString)
     buffer.close
@@ -55,10 +54,10 @@ class DBManager extends Actor with ActorLogging {
 
   override def receive: Receive = {
 
-    case post_comment_to_proprty(propertyId, comment) => post_comment_to_proprty(propertyId,comment)
-    case post_property(simple_property) => post_property(simple_property)
+    case post_comment_to_proprty(propertyId, comment) => sender() ! post_comment_to_proprty(propertyId, comment)
+    case post_property(simple_property) => sender() ! post_property(simple_property)
     case get_all_properties() => sender() ! get_all_properties()
-    case get_property(propertyId) => sender()! get_property(propertyId)
+    case get_property(propertyId) => sender() ! get_property(propertyId)
   }
 
   def get_all_properties(): List[Simple_property] = {
@@ -67,33 +66,47 @@ class DBManager extends Actor with ActorLogging {
     return simple_properties
   }
 
-  def get_property(propertyId: String): Commented_property  ={
+  def get_property(propertyId: String): Commented_property = {
     val commented_properties = read_properties()
-    val requested_property = commented_properties.find( item => item.property.get.property_id == propertyId)
-    if (requested_property.getOrElse(None)==None){
-      return new Commented_property(None,None)
-    }else{
+    val requested_property = commented_properties.find(item => item.property.get.property_id == propertyId)
+    if (requested_property.getOrElse(None) == None) {
+      return new Commented_property(None, None)
+    } else {
       return requested_property.get
     }
 
   }
 
-  def post_property(simple_property: Simple_property)={
+  def post_property(simple_property: Simple_property) = {
     //TODO : [ Check weather property_id exists or not, make it return a simple property]
     val properties = read_properties()
-    val updated_properties = properties ++: List(new Commented_property(property = Some(simple_property), comments = Option(Nil)))
+    val updated_properties = properties ++: List(
+      new Commented_property(property = Some(simple_property),
+        comments = Option(Nil)))
     save_properties(updated_properties)
   }
 
-  def post_comment_to_proprty(propertyId : String, comment: Comment): Unit ={
-    //TODO : [check weather user has already posted a comment for the specified year, make it return a comment]
+  def post_comment_to_proprty(propertyId: String, comment: Comment): Option[Comment] = {
+    // read properties list
+    log.info(comment.toJson.prettyPrint)
     val commented_properties = read_properties()
-    val index = commented_properties.indexWhere( item => item.property.get.property_id == propertyId)
-    if ( index != -1){
-      val item = commented_properties(index)
-      val updated_item = item.copy(comments = Option(item.comments.getOrElse(Nil) ++: List(comment)))
-      val updated_commented_properties = commented_properties.take(index) ++: List(updated_item) ++: commented_properties.takeRight(commented_properties.length-index-1)
-      save_properties(updated_commented_properties)
+    // find property which id is propertyId
+    val index = commented_properties.indexWhere(item => item.property.get.property_id == propertyId)
+    // if found
+    if (index != -1) {
+      // get the property with it's comments
+      val commented_property = commented_properties(index)
+      // check weather the user has already posted a comment for the same year
+      val exists = commented_property.comments.getOrElse(List.empty).exists(item => {
+        item.user_id == comment.user_id && item.year == comment.year})
+      log.info(exists.toString)
+      if ( exists == false) {
+          val updated_item = commented_property.copy(comments = Option(commented_property.comments.getOrElse(List.empty) ++: List(comment)))
+          val updated_commented_properties = commented_properties.take(index) ++: List(updated_item) ++: commented_properties.takeRight(commented_properties.length - index - 1)
+          save_properties(updated_commented_properties)
+          return Some(comment)
+      }
     }
+    return None
   }
 }
