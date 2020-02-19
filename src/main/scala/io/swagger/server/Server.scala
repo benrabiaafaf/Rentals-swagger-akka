@@ -59,14 +59,14 @@ object ApiService extends DefaultApiService {
     * Code: 200, Message: get the specified property information with comments, DataType: commented_property
     */
   override def propertiesPropertyIdGet(propertyId: String)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route = {
-    val response = (dBManager ? DBManager.get_property(propertyId)).mapTo[Commented_property]
+    val response = (dBManager ? DBManager.get_property(propertyId)).mapTo[Option[Commented_property]]
     requestcontext => {
       (response).flatMap {
-        (property: Commented_property) =>
-          if (property.property == None) {
+        (property: Option[Commented_property]) =>
+          if (property.getOrElse(None) == None) {
             propertiesPropertyIdGet400(requestcontext)
           } else {
-            propertiesPropertyIdGet200(property)(toEntityMarshallercommented_property)(requestcontext)
+            propertiesPropertyIdGet200(property.get)(toEntityMarshallercommented_property)(requestcontext)
           }
       }
     }

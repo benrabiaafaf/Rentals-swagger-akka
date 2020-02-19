@@ -66,13 +66,13 @@ class DBManager extends Actor with ActorLogging {
     return simple_properties
   }
 
-  def get_property(propertyId: String): Commented_property = {
+  def get_property(propertyId: String): Option[Commented_property] = {
     val commented_properties = read_properties()
     val requested_property = commented_properties.find(item => item.property.get.property_id == propertyId)
-    if (requested_property.getOrElse(None) == None) {
-      return new Commented_property(None, None)
+    if (requested_property.getOrElse(None) != None) {
+      return Some(requested_property.get)
     } else {
-      return requested_property.get
+      return None
     }
 
   }
