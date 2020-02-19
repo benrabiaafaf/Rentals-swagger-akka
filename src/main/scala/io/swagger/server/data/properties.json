@@ -1,1 +1,41 @@
-[{"comments":[],"property":{"adress":"Villetaneuse","area":20,"images":[],"owner_id":"o1","property_id":"p1","property_type":"T1","rent":600,"rooms":1}}]
+[
+  {
+    "comments": [
+      {
+        "description": "good place",
+        "rent": 600,
+        "user_id": "u1",
+        "year": 2019
+      },
+      {
+        "description": "good place",
+        "rent": 600,
+        "user_id": "u2",
+        "year": 2019
+      }
+    ],
+    "property": {
+      "adress": "Villetaneuse",
+      "area": 20,
+      "images": [],
+      "owner_id": "o1",
+      "property_id": "p1",
+      "property_type": "T1",
+      "rent": 600,
+      "rooms": 1
+    }
+  },
+  {
+    "comments": [],
+    "property": {
+      "adress": "Chatou",
+      "area": 50,
+      "images": [],
+      "owner_id": "o1",
+      "property_id": "p2",
+      "property_type": "T2",
+      "rent": 700,
+      "rooms": 2
+    }
+  }
+]
