@@ -15,11 +15,7 @@ class DefaultApi( defaultService: DefaultApiService, defaultMarshaller: DefaultA
   lazy val route: Route =
     path("properties") {
       get {
-
-
         defaultService.propertiesGet()
-
-
       }
     } ~
       path("properties") {
@@ -36,9 +32,7 @@ class DefaultApi( defaultService: DefaultApiService, defaultMarshaller: DefaultA
       path("properties"/ Segment) { (propertyId) =>
         get {
 
-
           defaultService.propertiesPropertyIdGet(propertyId = propertyId)
-
 
         }
       } ~
@@ -82,6 +76,8 @@ trait DefaultApiService {
   def propertiesPropertyIdGet404: Route =
     complete((404, "property_id does not exist"))
 
+
+
   /**
     * Code: 200, Message: get the specified property information with comments, DataType: commented_property
     */
@@ -90,6 +86,9 @@ trait DefaultApiService {
 
   def propertiesPropertyIdPost200(responsecomment: Comment)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route =
     complete((200, responsecomment))
+
+  def propertiesPropertyIdPost404: Route =
+    complete((404, "Cant post comment"))
 
   /**
     * Code: 200, Message: add the given coomment to the specified property, DataType: comment
