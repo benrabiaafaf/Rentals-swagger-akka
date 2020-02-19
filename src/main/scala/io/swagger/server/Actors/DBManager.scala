@@ -77,18 +77,22 @@ class DBManager extends Actor with ActorLogging {
 
   }
 
-  def post_property(simple_property: Simple_property) = {
+  def post_property(simple_property: Simple_property): Option[Simple_property] = {
     //TODO : [ Check weather property_id exists or not, make it return a simple property]
     val properties = read_properties()
-    val updated_properties = properties ++: List(
-      new Commented_property(property = Some(simple_property),
-        comments = Option(Nil)))
-    save_properties(updated_properties)
+    val exists = properties.exists(item => item.property.get.property_id == simple_property.property_id)
+    if ( ! exists){
+      val updated_properties = properties ++: List(
+        new Commented_property(property = Some(simple_property),
+          comments = Option(Nil)))
+      save_properties(updated_properties)
+      return Some(simple_property)
+    }
+    return None
   }
 
   def post_comment_to_proprty(propertyId: String, comment: Comment): Option[Comment] = {
     // read properties list
-    log.info(comment.toJson.prettyPrint)
     val commented_properties = read_properties()
     // find property which id is propertyId
     val index = commented_properties.indexWhere(item => item.property.get.property_id == propertyId)
@@ -99,7 +103,6 @@ class DBManager extends Actor with ActorLogging {
       // check weather the user has already posted a comment for the same year
       val exists = commented_property.comments.getOrElse(List.empty).exists(item => {
         item.user_id == comment.user_id && item.year == comment.year})
-      log.info(exists.toString)
       if ( exists == false) {
           val updated_item = commented_property.copy(comments = Option(commented_property.comments.getOrElse(List.empty) ++: List(comment)))
           val updated_commented_properties = commented_properties.take(index) ++: List(updated_item) ++: commented_properties.takeRight(commented_properties.length - index - 1)
