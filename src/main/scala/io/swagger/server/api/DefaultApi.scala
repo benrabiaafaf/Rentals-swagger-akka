@@ -1,7 +1,7 @@
 package io.swagger.server.api
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{complete, _}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import io.swagger.server.model.Comment
@@ -43,8 +43,6 @@ class DefaultApi( defaultService: DefaultApiService, defaultMarshaller: DefaultA
           entity(as[Comment]) { body =>
             defaultService.propertiesPropertyIdPost(body = body, propertyId = propertyId)
           }
-
-
         }
       }
 }
@@ -54,33 +52,24 @@ trait DefaultApiService {
   def propertiesGet200(responsesimple_propertyarray: List[Simple_property])(implicit toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]]): Route =
     complete((200, responsesimple_propertyarray))
 
-
-  /**
-    * Code: 200, Message: a list of availble properties, DataType: List[simple_property]
-    */
   def propertiesGet()
                    (implicit toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]]): Route
 
   def propertiesPost200(responsesimple_property: Simple_property)(implicit toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property]): Route =
     complete((200, responsesimple_property))
 
-  /**
-    * Code: 200, Message: add the given property, DataType: simple_property
-    */
+  def propertiesPost400: Route =
+    complete((400,""))
+
   def propertiesPost(body: Simple_property)
                     (implicit toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property]): Route
 
   def propertiesPropertyIdGet200(responsecommented_property: Commented_property)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route =
     complete((200, responsecommented_property))
 
-  def propertiesPropertyIdGet404: Route =
-    complete((404, "property_id does not exist"))
+  def propertiesPropertyIdGet400: Route =
+    complete((404, ""))
 
-
-
-  /**
-    * Code: 200, Message: get the specified property information with comments, DataType: commented_property
-    */
   def propertiesPropertyIdGet(propertyId: String)
                              (implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route
 
@@ -88,11 +77,8 @@ trait DefaultApiService {
     complete((200, responsecomment))
 
   def propertiesPropertyIdPost404: Route =
-    complete((404, "Cant post comment"))
+    complete((400, ""))
 
-  /**
-    * Code: 200, Message: add the given coomment to the specified property, DataType: comment
-    */
   def propertiesPropertyIdPost(body: Comment, propertyId: String)
                               (implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route
 
