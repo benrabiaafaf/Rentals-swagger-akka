@@ -67,25 +67,28 @@ object ApiService extends DefaultApiService {
     requestcontext => {
       (response).flatMap {
         (property: Commented_property) =>
-          if(property.property == None){
-            propertiesPropertyIdGet404()(requestcontext)
-          }else{
+          if (property.property == None) {
+            propertiesPropertyIdGet404(requestcontext)
+          } else {
             propertiesPropertyIdGet200(property)(toEntityMarshallercommented_property)(requestcontext)
           }
       }
     }
-
   }
 
   /**
     * Code: 200, Message: add the given coomment to the specified property, DataType: comment
     */
   override def propertiesPropertyIdPost(body: Comment, propertyId: String)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route = {
-    val response = (dBManager ? DBManager.post_comment_to_proprty(propertyId, body)).mapTo[Comment]
+    val response = (dBManager ? DBManager.post_comment_to_proprty(propertyId, body)).mapTo[Option[Comment]]
     requestcontext => {
       (response).flatMap {
-        (comment: Comment) =>
-          propertiesPropertyIdPost200(comment)(toEntityMarshallercomment)(requestcontext)
+        (comment: Option[Comment]) =>
+          if (comment.getOrElse(None) != None) {
+            propertiesPropertyIdPost200(comment.get)(toEntityMarshallercomment)(requestcontext)
+          } else {
+            propertiesPropertyIdPost404(requestcontext)
+          }
       }
     }
   }
