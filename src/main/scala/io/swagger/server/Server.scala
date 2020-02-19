@@ -28,10 +28,6 @@ object ApiService extends DefaultApiService {
 
   import CostumContext._
 
-  /**
-    * Code: 200, Message: a list of availble properties, DataType: List[simple_property]
-    */
-
   //  type Route = RequestContext => Future[RouteResult]
   override def propertiesGet()(implicit toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]]): Route = {
 
@@ -44,16 +40,17 @@ object ApiService extends DefaultApiService {
     }
   }
 
-  /**
-    * Code: 200, Message: add the given property, DataType: simple_property
-    */
+
   override def propertiesPost(body: Simple_property)(implicit toEntityMarshallersimple_property: ToEntityMarshaller[Simple_property]): Route = {
-    // TODO : body vérification
-    val response = (dBManager ? DBManager.post_property(body)).mapTo[Simple_property]
+    val response = (dBManager ? DBManager.post_property(body)).mapTo[Option[Simple_property]]
     requestcontext => {
       (response).flatMap {
-        (property: Simple_property) =>
-          propertiesPost200(property)(toEntityMarshallersimple_property)(requestcontext)
+        (property: Option[Simple_property]) =>
+          if( property.getOrElse(None) != None){
+            propertiesPost200(property.get)(toEntityMarshallersimple_property)(requestcontext)
+          }else{
+            propertiesPost400(requestcontext)
+          }
       }
     }
   }
@@ -62,13 +59,12 @@ object ApiService extends DefaultApiService {
     * Code: 200, Message: get the specified property information with comments, DataType: commented_property
     */
   override def propertiesPropertyIdGet(propertyId: String)(implicit toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property]): Route = {
-    // TODO : deal with the None case
     val response = (dBManager ? DBManager.get_property(propertyId)).mapTo[Commented_property]
     requestcontext => {
       (response).flatMap {
         (property: Commented_property) =>
           if (property.property == None) {
-            propertiesPropertyIdGet404(requestcontext)
+            propertiesPropertyIdGet400(requestcontext)
           } else {
             propertiesPropertyIdGet200(property)(toEntityMarshallercommented_property)(requestcontext)
           }
@@ -76,9 +72,6 @@ object ApiService extends DefaultApiService {
     }
   }
 
-  /**
-    * Code: 200, Message: add the given coomment to the specified property, DataType: comment
-    */
   override def propertiesPropertyIdPost(body: Comment, propertyId: String)(implicit toEntityMarshallercomment: ToEntityMarshaller[Comment]): Route = {
     val response = (dBManager ? DBManager.post_comment_to_proprty(propertyId, body)).mapTo[Option[Comment]]
     requestcontext => {
@@ -111,7 +104,6 @@ object ApiMarshaller extends DefaultApiMarshaller with SprayJsonSupport {
   implicit val toEntityMarshallercommented_property: ToEntityMarshaller[Commented_property] = commeented_propertyFormat
 
   implicit val toEntityMarshallersimple_propertyarray: ToEntityMarshaller[List[Simple_property]] = listFormat(simple_propertyFormat)
-
 
 }
 
